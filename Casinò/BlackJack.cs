@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Globalization;
+using System.Dynamic;
 
 namespace Casinò
 {
@@ -21,31 +22,42 @@ namespace Casinò
     {
         String nomeUtente;
         private Random random;
+        private Giocata nuovaGiocata;
+        int puntataAttuale = 0;
         public BlackJack(string nomeUtent)
         {
             InitializeComponent();
             nomeUtente = nomeUtent;
             random = new Random();
-            CarteUtente();
+            button2.Text = "INIZIA";
+            button1.Visible = false;
+            CaricaDati();
+            
+            
+
         }
 
         private void BlackJack_Load(object sender, EventArgs e)
         {
-
+            
         }
+        
         public class Credenziali
         {
             public string nome { get; set; }
             public string password { get; set; }
             public long saldo { get; set; }
         }
-        private void carte()
+        public class Giocata
         {
-            List<int> list = new List<int>();
-            list.Add(random.Next(2, 53));
+            public int seme {  get; set; }
+            public int numero { get; set; }
+            public int conta { get; set; }
 
-
+            public List<int> mazzoSeme { get; set; }
+            public List<int> mazzoNumero { get; set; }
         }
+        
 
         private void buttonEsci_Click(object sender, EventArgs e)
         {
@@ -53,68 +65,223 @@ namespace Casinò
             Home formHome= new Home(nomeUtente);
             formHome.Show();
         }
-        private void aggiungiPuntata(object sender, EventArgs e)
+        private void CaricaDati()
         {
-
             string Datinonserializzati = File.ReadAllText("Credenziali.json");
             List<Credenziali> listaDati = JsonSerializer.Deserialize<List<Credenziali>>(Datinonserializzati);
 
 
-            Credenziali Utente = new Credenziali();
+            Credenziali utenteTrovato = new Credenziali();
 
             foreach (Credenziali utente in listaDati)
             {
                 if (utente.nome == nomeUtente)
                 {
-                    Utente = utente;
+                    utenteTrovato = utente;
                     break;
                 }
             }
 
-            //long importo;
-            //.TryParse(textBox1.Text, out importo);
-            //Utente.saldo += importo;
-            //labelSaldo.Text = Utente.saldo.ToString("C");
-            // DatiRegistrati = JsonSerializer.Serialize(listaDati);
-            //File.WriteAllText("Credenziali.json", DatiRegistrati);
-            //textBox1.Clear();
-
+            
+            label5.Text = utenteTrovato.saldo.ToString("C");
+            
         }
-        
-        private void CarteUtente() {
-            int[,] Carte = new int[4, 13];
-            List<int> listSeme = new List<int>();
-            Random random = new Random();
-            while (listSeme.Count < 52)
+        private void aggiungiPuntata(int Puntata)
+        {
+            string Datinonserializzati = File.ReadAllText("Credenziali.json");
+            List<Credenziali> listaDati = JsonSerializer.Deserialize<List<Credenziali>>(Datinonserializzati);
+
+            for (int i = 0; i < listaDati.Count; i++)
             {
-                int numero = random.Next(2, 53); 
-                if (!listSeme.Contains(numero))  
+                if (listaDati[i].nome == nomeUtente)
                 {
-                    listSeme.Add(numero);
+                    if (button3.Text == "RIMUOVI")
+                    {
+                        if (puntataAttuale > 0)
+                        {
+                            puntataAttuale -= Puntata;
+                            listaDati[i].saldo += Puntata;
+                        }
+                        else MessageBox.Show("Puntata vuota!");
+                    }
+                    else
+                    {
+                        if (listaDati[i].saldo >= Puntata)
+                        {
+                            puntataAttuale += Puntata;
+                            listaDati[i].saldo -= Puntata;
+                        }
+                        else
+                        {
+                            MessageBox.Show("Saldo insufficiente per questa puntata!");
+                            return;
+                        }
+                    }
+                    break;
                 }
             }
-            int contAggiungi = 0;
+
+            label6.Text = puntataAttuale.ToString("C");
+            label5.Text = listaDati.First(u => u.nome == nomeUtente).saldo.ToString("C");
+            string DatiRegistrati = JsonSerializer.Serialize(listaDati);
+            File.WriteAllText("Credenziali.json", DatiRegistrati);
+        }
 
 
 
+        private void IniziaPartita()
+        {
+            button2.Text = "CARTA";
+            button1.Visible = true;
+            nuovaGiocata = new Giocata();
+            nuovaGiocata.conta = 0;
+            nuovaGiocata.mazzoSeme = new List<int>();
+            nuovaGiocata.mazzoNumero = new List<int>();
 
-
-            if (listSeme[0]/13 <= 1)
+            for (int i = 0; i < 2; i++)
             {
-                label2.Text = (listSeme[0] / 13).ToString();
-            }else if (listSeme[0]/13 > 1 && listSeme[0]/13 <=2)
-            {
-                label2.Text = (listSeme[0] / 13).ToString();
+                bool posizioneLibera = false;
+                while (posizioneLibera == false)
+                {
+                    nuovaGiocata.seme = random.Next(1, 5);
+                    nuovaGiocata.numero = random.Next(2, 11);
+
+                    bool trovataPosizioneUguale = false;
+                    for (int j = 0; j < nuovaGiocata.mazzoSeme.Count; j++)
+                    {
+                        if (nuovaGiocata.seme == nuovaGiocata.mazzoSeme[j] && nuovaGiocata.numero == nuovaGiocata.mazzoNumero[j])
+                        {
+                            trovataPosizioneUguale = true;
+                            break;
+                        }
+                    }
+
+                    if (trovataPosizioneUguale == false)
+                    {
+                        nuovaGiocata.mazzoSeme.Add(nuovaGiocata.seme);
+                        nuovaGiocata.mazzoNumero.Add(nuovaGiocata.numero);
+                        posizioneLibera = true;
+                        nuovaGiocata.conta += nuovaGiocata.numero;
+                        label2.Text = nuovaGiocata.conta.ToString();
+                    }
+                }
             }
-            else if (listSeme[0]/13 > 2 && listSeme[0]/13 <= 3)
+        }
+
+
+
+        private void AggiungiCarta()
+        {
+            bool posizioneLibera = false;
+            while (posizioneLibera == false)
             {
-                label2.Text = (listSeme[0] / 13).ToString();
-            }
-            else if (listSeme[0]/13 > 3 && listSeme[0]/13 <= 4)
-            {
-                label2.Text = (listSeme[0] / 13).ToString();
+                nuovaGiocata.seme = random.Next(1, 5);
+                nuovaGiocata.numero = random.Next(2, 11);
+
+                bool trovataPosizioneUguale = false;
+                for (int j = 0; j < nuovaGiocata.mazzoSeme.Count; j++)
+                {
+                    if (nuovaGiocata.seme == nuovaGiocata.mazzoSeme[j] && nuovaGiocata.numero == nuovaGiocata.mazzoNumero[j])
+                    {
+                        trovataPosizioneUguale = true;
+                        break;
+                    }
+                }
+
+                if (trovataPosizioneUguale == false)
+                {
+                    nuovaGiocata.mazzoSeme.Add(nuovaGiocata.seme);
+                    nuovaGiocata.mazzoNumero.Add(nuovaGiocata.numero);
+                    posizioneLibera = true;
+                    nuovaGiocata.conta += nuovaGiocata.numero;
+                    label2.Text = nuovaGiocata.conta.ToString();
+                }
             }
 
+            if (nuovaGiocata.conta > 21)
+            {
+                if (nuovaGiocata.mazzoNumero.Contains(11) == true)
+                {
+                    nuovaGiocata.conta -= 10;
+                    label2.Text = nuovaGiocata.conta.ToString();
+                }
+                else
+                {
+                    MessageBox.Show("Hai sforato! HAI PERSO!");
+                    puntataAttuale = 0;
+                    label6.Text = puntataAttuale.ToString("C");
+                    button2.Text = "INIZIA";
+                    button1.Visible = false;
+                    label2.Text = "";
+                    pictureBox1.Enabled = true;
+                }
+               
+            }
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (button2.Text == "INIZIA")
+            {
+                if (puntataAttuale == 0) {
+                    MessageBox.Show("Per favore fare una puntata!");
+                }
+                else { 
+                    IniziaPartita();
+                    pictureBox1.Enabled = false;
+                }
+            }
+            else
+            {
+                if (puntataAttuale == 0)
+                {
+                    MessageBox.Show("Per favore fare una puntata");
+                }
+                else
+                {
+                    AggiungiCarta();
+                }
+            }
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            
+            int Puntata = 1;
+            aggiungiPuntata(Puntata);
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+            int Puntata = 5;
+            aggiungiPuntata(Puntata);
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+            int Puntata = 20;
+            aggiungiPuntata(Puntata);
+        }
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+            int Puntata = 50;
+            aggiungiPuntata(Puntata);
+        }
+
+        private void pictureBox5_Click(object sender, EventArgs e)
+        {
+            int Puntata = 100;
+            aggiungiPuntata(Puntata);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (button3.Text == "AGGIUNGI") {
+                button3.Text = "RIMUOVI";
+            } 
+            else if (button3.Text == "RIMUOVI"){
+                button3.Text = "AGGIUNGI";
+            }
         }
     }
 }
