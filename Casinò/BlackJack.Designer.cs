@@ -196,21 +196,26 @@
             // 
             // button1
             // 
+            this.button1.BackColor = System.Drawing.Color.MediumSeaGreen;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button1.Location = new System.Drawing.Point(527, 723);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(65, 48);
             this.button1.TabIndex = 45;
             this.button1.Text = "STAI";
-            this.button1.UseVisualStyleBackColor = true;
+            this.button1.UseVisualStyleBackColor = false;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // button2
             // 
+            this.button2.BackColor = System.Drawing.Color.MediumSeaGreen;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button2.Location = new System.Drawing.Point(683, 723);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(65, 48);
             this.button2.TabIndex = 46;
             this.button2.Text = "CARTA";
-            this.button2.UseVisualStyleBackColor = true;
+            this.button2.UseVisualStyleBackColor = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // label4
@@ -248,12 +253,14 @@
             // 
             // button3
             // 
+            this.button3.BackColor = System.Drawing.Color.MediumSeaGreen;
+            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button3.Location = new System.Drawing.Point(8, 723);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(102, 34);
             this.button3.TabIndex = 50;
             this.button3.Text = "AGGIUNGI";
-            this.button3.UseVisualStyleBackColor = true;
+            this.button3.UseVisualStyleBackColor = false;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // BlackJack
